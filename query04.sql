@@ -25,7 +25,7 @@ trip_lengths as (
             order by st_length(sl.shape_geom::geography) desc
         ) as rn
     from septa.bus_trips as t
-    inner join shape_lines as sl on sl.shape_id = t.shape_id
+    inner join shape_lines as sl on t.shape_id = sl.shape_id
 )
 
 select
@@ -33,7 +33,7 @@ select
     tl.trip_headsign,
     round(tl.shape_length) as shape_length
 from trip_lengths as tl
-inner join septa.bus_routes as r on r.route_id = tl.route_id
+inner join septa.bus_routes as r on tl.route_id = r.route_id
 where tl.rn = 1
 order by tl.shape_length desc
 limit 2

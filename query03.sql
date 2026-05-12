@@ -10,10 +10,13 @@ select
     trim(bs.stop_name) as stop_name,
     round(st_distance(p.geog, bs.geog)::numeric, 2) as distance
 from phl.pwd_parcels as p
-cross join lateral (
-    select stop_name, geog
-    from septa.bus_stops
-    order by geog <-> p.geog
-    limit 1
-) as bs
+cross join
+    lateral (
+        select
+            bus_stops.stop_name,
+            bus_stops.geog
+        from septa.bus_stops
+        order by bus_stops.geog <-> p.geog
+        limit 1
+    ) as bs
 order by distance desc

@@ -10,11 +10,12 @@ with
 septa_bus_stop_blockgroups as (
     select
         stops.stop_id,
-        bg.geoid
+        '1500000US' || bg.geoid as geoid
     from septa.bus_stops as stops
     inner join census.blockgroups_2020 as bg
-        on st_dwithin(stops.geog, bg.geog, 800)
-        and bg.geoid like '42101%'
+        on
+            st_dwithin(stops.geog, bg.geog, 800)
+            and bg.geoid like '42101%'
 ),
 
 septa_bus_stop_surrounding_population as (
@@ -29,8 +30,8 @@ septa_bus_stop_surrounding_population as (
 
 select
     stops.stop_id,
-    trim(stops.stop_name) as stop_name,
-    pop.estimated_pop_800m::integer
+    pop.estimated_pop_800m::integer,
+    trim(stops.stop_name) as stop_name
 from septa_bus_stop_surrounding_population as pop
 inner join septa.bus_stops as stops using (stop_id)
 order by pop.estimated_pop_800m asc

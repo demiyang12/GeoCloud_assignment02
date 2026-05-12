@@ -17,9 +17,11 @@ with rail_with_nearest as (
         )) as azimuth
     from septa.rail_stops as rs
     cross join lateral (
-        select address, geog
+        select
+            pwd_parcels.address,
+            pwd_parcels.geog
         from phl.pwd_parcels
-        order by geog <-> rs.geog
+        order by pwd_parcels.geog <-> rs.geog
         limit 1
     ) as nearest
 )
@@ -27,19 +29,19 @@ with rail_with_nearest as (
 select
     stop_id::integer,
     stop_name,
-    dist_m || ' meters ' ||
-    case
-        when azimuth < 22.5 or azimuth >= 337.5  then 'N'
-        when azimuth < 67.5  then 'NE'
+    stop_lon,
+    stop_lat,
+    dist_m || ' meters '
+    || case
+        when azimuth < 22.5 or azimuth >= 337.5 then 'N'
+        when azimuth < 67.5 then 'NE'
         when azimuth < 112.5 then 'E'
         when azimuth < 157.5 then 'SE'
         when azimuth < 202.5 then 'S'
         when azimuth < 247.5 then 'SW'
         when azimuth < 292.5 then 'W'
-        else                      'NW'
+        else 'NW'
     end
-    || ' of ' || address as stop_desc,
-    stop_lon,
-    stop_lat
+    || ' of ' || address as stop_desc
 from rail_with_nearest
 order by stop_id::integer
